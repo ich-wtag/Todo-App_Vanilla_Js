@@ -7,3 +7,4 @@ export const $searchButton = document.getElementById("search-button");
 export const $allTodoButton = document.getElementById("all");
 export const $incompleteTodoButton = document.getElementById("incomplete");
 export const $completeTodoButton = document.getElementById("complete");
+export const $loadMoreButton = document.querySelector(".load-more-button");
