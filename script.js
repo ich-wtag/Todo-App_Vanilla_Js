@@ -4,6 +4,9 @@ import {
     $todoList,
     $errorMessageElement,
     $searchInput,
+    $allTodoButton,
+    $completeTodoButton,
+    $incompleteTodoButton,
 } from "./element.js";
 import {
     sanitizeInput,
@@ -13,6 +16,11 @@ import {
 } from "./utility.js";
 
 let todos = [];
+let searchedArray = [];
+let filteredArray = [];
+
+let isSearched = false;
+let filterValue = "all";
 
 const addTodoHandler = () => {
     const todoTitle = sanitizeInput($todoInput.value).trim();
@@ -33,13 +41,13 @@ const addTodoHandler = () => {
     clearInputField($todoInput);
 
     clearInputField($searchInput);
-    renderTodos(todos);
+    filterTodosHandler(filterValue);
 };
 
 const deleteTodoHandler = (todoId) => {
     todos = todos.filter((todo) => todo.id !== todoId);
-    renderTodos(todos);
     clearInputField($searchInput);
+    filterTodosHandler(filterValue);
 };
 
 const editTodoHandler = (
@@ -90,7 +98,6 @@ const cancelEditingTodoHandler = (
 
     editButton.innerText = "Edit";
     todo.isEditing = false;
-    clearInputField($searchInput);
 };
 
 const markDoneTodoHandler = (
@@ -121,15 +128,42 @@ const markDoneTodoHandler = (
 
     todo.title = sanitizeInput(inputElement.value).trim();
     todo.isCompleted = true;
+    filterTodosHandler(filterValue);
 };
 
 const searchHandler = () => {
     const searchedValue = $searchInput.value.toLowerCase().trim();
-    const searchedArray = todos.filter((todo) =>
+    searchedArray = todos.filter((todo) =>
         todo.title.toLowerCase().includes(searchedValue)
     );
 
-    renderTodos(searchedArray);
+    filterTodosHandler(filterValue);
+};
+
+const filterTodosHandler = (toFilterValue) => {
+    isSearched = $searchInput.value.trim().length ? true : false;
+    let tobeFilteredArray = isSearched ? searchedArray : todos;
+
+    switch (toFilterValue) {
+        case "incomplete":
+            filteredArray = tobeFilteredArray.filter(
+                (todo) => !todo.isCompleted
+            );
+            break;
+
+        case "complete":
+            filteredArray = tobeFilteredArray.filter(
+                (todo) => todo.isCompleted
+            );
+            break;
+
+        default:
+            filteredArray = [...tobeFilteredArray];
+            break;
+    }
+
+    filterValue = toFilterValue;
+    renderTodos(filteredArray);
 };
 
 const createTodoElement = (todo) => {
@@ -210,3 +244,10 @@ const renderTodos = (todos) => {
 
 $addButton.addEventListener("click", addTodoHandler);
 $searchInput.addEventListener("input", searchHandler);
+$allTodoButton.addEventListener("click", () => filterTodosHandler("all"));
+$incompleteTodoButton.addEventListener("click", () =>
+    filterTodosHandler("incomplete")
+);
+$completeTodoButton.addEventListener("click", () =>
+    filterTodosHandler("complete")
+);
